@@ -406,8 +406,7 @@ class Background():
                 self.timeRects[i].topleft = [Vars.BGSLOTSTARTX,Vars.BGSLOTSTARTY]
             else:
                 self.timeRects[i].topleft = self.timeRects[i-1].topleft + [0,Vars.BGSLOTHEIGHT]
-        
-        
+         
 def InterfaceHandler():
     def __init__(self):
         self.ctrl = False
