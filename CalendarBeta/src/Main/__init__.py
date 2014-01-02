@@ -282,7 +282,77 @@ class Triangle():
             self.PointRight()
         elif self.directions == 'left':
             self.PointLeft()
-            
+ 
+class Button():
+    def __init__(self,pos,offset,rect,image = None,color = Vars.BLACK,outlineColor = Vars.WHITE ,isSwitch = False,switchPos = False):
+        #default no image, black bg, white outline, not a switch
+        self.pos = pos
+        self.offset = offset
+        self.rect = rect
+        self.image = self.LoadImage(image)
+        self.color = color
+        self.outlineColor = outlineColor
+        self.isSwitch = isSwitch
+        self.switchPos = switchPos
+        self.size = 5                       #size determines size of bevel
+        self.reverse = False
+    def LoadImage(self,imageInfo):
+        if imageInfo == None:
+            return None
+        else:
+            #DO SHIT HERE
+            return None
+    
+    def DrawImage(self):
+        #DO SHIT HERE
+        pass
+    
+    def Draw(self):
+        if (self.reverse == True):
+            color = self.outlineColor
+            outlineColor = self.color
+            self.reverse = False
+        else:
+            color = self.color
+            outlineColor = self.outlineColor
+        self.DrawBox(self.rect,outlineColor,self.size)
+        temp = copy.deepcopy(self.rect)
+        temp.topleft = temp.topleft + [2,2]
+        temp.inflate_ip(-4,-4)
+        self.DrawBox(temp,color,self.size)
+        if(self.image != None):
+            self.DrawImage()
+    
+    def DrawBox(self,aRect,color,size):
+        main = copy.deepcopy(aRect)
+        main.move_ip(size,size)
+        sizeNeg = size*-1
+        sizeDoubleNeg = 2*sizeNeg
+        sizeDouble = 2*size
+        main.inflate_ip(sizeDouble,sizeDouble)
+        pygame.draw.circle(Vars.DISPLAYSURF,color,main.topleft,size)
+        pygame.draw.circle(Vars.DISPLAYSURF,color,main.topright,size)
+        pygame.draw.circle(Vars.DISPLAYSURF,color,main.bottomleft,size)
+        pygame.draw.circle(Vars.DISPLAYSURF,color,main.bottomright,size)
+        pygame.draw.rect(Vars.DISPLAYSURF,color,main)
+        temp = main.move(sizeNeg,0)
+        pygame.draw.rect(Vars.DISPLAYSURF,color,temp)
+        temp = main.move(size,0)
+        pygame.draw.rect(Vars.DISPLAYSURF,color,temp)
+        temp = main.move(0,size)
+        pygame.draw.rect(Vars.DISPLAYSURF,color,temp)        
+        temp = main.move(0,sizeNeg)
+        pygame.draw.rect(Vars.DISPLAYSURF,color,temp)
+        
+    def MouseClick(self,aLoc):
+        if self.rect.collidepoint(aLoc) == True:
+            self.reverse = True
+            return True
+        return False
+    
+    def Move(self,diff):
+        self.rect.move_ip(diff)
+    
 class Window():
     def __init__(self,loc,aType,BGcolor=Vars.WHITE,FrontColor=Vars.MEDGREY,TextColor=Vars.BLACK):
         self.type = aType
@@ -406,8 +476,7 @@ class Background():
                 self.timeRects[i].topleft = [Vars.BGSLOTSTARTX,Vars.BGSLOTSTARTY]
             else:
                 self.timeRects[i].topleft = self.timeRects[i-1].topleft + [0,Vars.BGSLOTHEIGHT]
-        
-        
+         
 def InterfaceHandler():
     def __init__(self):
         self.ctrl = False
