@@ -69,22 +69,22 @@ class InputBox():
             
     def Input(self,inputActions):
         for i in range(len(inputActions)):
-            type = Interface.DetermineType(inputActions[i])
-            if type == 0:
+            type = inputActions[i][0]
+            if type == '':
                 pass
-            elif type == 1:
+            elif type == '':
                 if self.selected == True:
                     #go through transup
                     pass
-            elif type == 2:
+            elif type == '':
                 if self.selected == True:
                     #go through transdn
                     pass
-            elif type == 3:
+            elif type == '':
                 if self.selected == True:
                     #go through actiondn
                     pass
-            elif type == 4:
+            elif type == '':
                 if self.selected == True:
                     self.data = self.data+inputActions[i]
                 
@@ -289,7 +289,10 @@ class Button():
         self.pos = pos
         self.offset = offset
         self.rect = rect
-        self.image = self.LoadImage(image)
+        if image != None:
+            self.image = self.LoadImage(image)
+        else:
+            self.image = image
         self.color = color
         self.outlineColor = outlineColor
         self.isSwitch = isSwitch
@@ -354,49 +357,31 @@ class Button():
         self.rect.move_ip(diff)
     
 class Window():
-    def __init__(self,loc,aType,BGcolor=Vars.WHITE,FrontColor=Vars.MEDGREY,TextColor=Vars.BLACK):
+    def __init__(self, aType, loc, bgColor = None,borderColor = None,font = None):
         self.type = aType
-        self.data = []
-        self.boxes = []
-        self.drops = []
-        self.offset = loc
-        self.titleHeight = 25
-        self.height
-        self.width
-        self.closeRect
-        self.minimRect
-        self.title = ''
+        self.loc = loc
+        self.size = [] #[x,y]; init by type
+        self.rects = [] # Whole Window, BG of Child, Titlebar,Right border, Bottom border
+        self.titlebarText = [] #text, Surface, Rect; init by type
+        self.titlebarButtons = [] #init
         self.moving = False
-        self.BGrect
-        self.titleRect
-        self.spacing = 5
-        self.BGcolor = BGcolor
-        self.FrontColor = FrontColor
-        self.TextColor = TextColor
+        self.bgColor = bgColor
+        self.borderColor = borderColor
+        self.font = font
         
-        self.LoadData()
-        
-        
-    def LoadData(self):
-        #also used to reload data if type changes
-        if self.type == 'newlog':
-            self.title = 'New Log'
-            self.width = 200
-            self.height = 100
-            self.MakeRects()
-            aLoc = (self.titleRect.left+self.spacing,self.titleRect.bottom+self.spacing)
-            tempObj = DropBox(aLoc,'newloginit')
+        self.Initialize()
     
-    def MakeRects(self):
+    def Initialize(self):
+        pass
+    
+    def InitRects(self):
         #need to create checking for outside of bounds
-        self.BGrect = pygame.Rect(self.offset[0],self.offset[1],self.width,self.height)
-        self.titleRect = pygame.Rect(self.BGrect.left,self.BGRect.top,self.BGrect.width,self.titleHeight)
-        btnSize = self.titleHeight-6
-        self.closeRect = pygame.Rect((self.BGrect.right-6-btnSize),(self.BGrect.top-3),btnSize,btnSize)
-        self.minimRect = copy.deepcopy(self.closeRect)
-        self.minimRect.left = self.minimRect.left-6-btnSize
+        pass
         
-    def DisplayTitleBar(self):
+    def Move(self):
+        pass
+    
+    def Draw(self):
         pass
     
 class Background():
@@ -411,15 +396,39 @@ class Background():
         self.bgColorRects = []
         self.clockSurf
         self.clockRect
+        self.dateSurf
+        self.dateRect
+        self.viewMonthSurf
+        self.viewDaySurf
+        self.viewMonthRect
+        self.viewDayRect
+        self.viewYearSurf
+        self.viewYearRect
+        self.viewDate = [0,0,0]
+        self.Initialize()
     
-    def Init(self):
+    def Initialize(self):
         self.SetTimeRects()
         self.SetBgRects()
         self.UpdateClock()
         self.clockRect = self.clockSurf.get_rect()
         self.clockRect.topleft = Vars.CLOCKPOS
-    
+        self.UpdateDate()
+        self.dateRect = self.dateSurf.get_rect()
+        self.dateRect.topleft = Vars.DATEPOS
+        timeInfo = list(time.localtime(time.time()))
+        self.ChangeViewYear(timeInfo[0])
+        self.ChangeViewMonth(timeInfo[1])
+        self.ChangeViewDay(timeInfo[2])
+        self.viewMonthRect = self.viewMonthSurf.get_rect()
+        self.viewMonthRect.topleft = Vars.VIEWMONTHPOS
+        self.viewDayRect = self.viewDaySurf.get_rect()
+        self.viewDayRect.topleft = self.viewMonthRect.topright
+        self.viewYearRect = self.viewYearSurf.get_rect()
+        self.viewYearRect.topleft = self.viewDayRect.topright
+        
     def Draw(self):
+        self.UpdateClock()
         Vars.DISPLAYSURF.fill(Vars.WHITE)
         pygame.draw.rect(Vars.DISPLAYSURF,Vars.TOOLBARGREY,self.toolbarRect)
         pygame.draw.rect(Vars.DISPLAYSURF,Vars.TOOLBARGREY,self.titlebarRect)
@@ -434,13 +443,81 @@ class Background():
         for i in range(len(self.timeRects)):
             Vars.DISPLAYSURF.blit(self.timeSurfs[i],self.timeRects[i])
         Vars.DISPLAYSURF.blit(self.clockSurf,self.clockRect)
+        Vars.DISPLAYSURF.blit(self.viewMonthSurf,self.viewMonthRect)
+        Vars.DISPLAYSURF.blit(self.viewDaySurf,self.viewDayRect)
+        Vars.DISPLAYSURF.blit(self.viewYearSurf,self.viewYearRect)
+        Vars.DISPLAYSURF.blit(self.dateSurf,self.dateRect)
         #draw other titlebar elements
-        #month, day, arrow buttons, current date
+        # arrow buttons
+     
+    def ChangeViewDay(self,aDay):
+        self.viewDate[1] = aDay
+        if (aDay%10 == 1):
+            dayString = aDay + 'st'
+        elif (aDay%10 == 2):
+            dayString = aDay + 'nd'
+        elif (aDay%10 == 3):
+            dayString = aDay + 'rd'
+        else:
+            dayString = aDay + 'th'
+        self.viewDaySurf = Vars.CLOCKFONT.render(dayString,True,Vars.BLACK,Vars.TOOLBARGREY)
         
+        #when other stuff is implemented do shit
+    
+    def ChangeViewMonth(self,aMonth):
+        self.viewDate[0] = aMonth
+        if aMonth == 1:
+            monthString = 'January'
+        elif aMonth == 2:
+            monthString = 'February'
+        elif aMonth == 3:
+            monthString = 'March'
+        elif aMonth == 4:
+            monthString = 'April'
+        elif aMonth == 5:
+            monthString = 'May'
+        elif aMonth == 6:
+            monthString = 'June'
+        elif aMonth == 7:
+            monthString = 'July'
+        elif aMonth == 8:
+            monthString = 'August'
+        elif aMonth == 9:
+            monthString = 'September'
+        elif aMonth == 10:
+            monthString = 'October'
+        elif aMonth == 11:
+            monthString = 'November'
+        elif aMonth == 12:
+            monthString = 'December'
+        self.viewMonthSurf = Vars.CLOCKFONT.render(monthString,True,Vars.BLACK,Vars.TOOLBARGREY)
+        #when other stuff is implemented do shit
+    
+    def ChangeViewYear(self,aYear):
+        self.viewDate[2] = aYear
+        self.viewYearSurf = Vars.CLOCKFONT.render(aYear,True,Vars.BLACK,Vars.TOOLBARGREY)
+        #when other stuff is implemented do shit
+    
+    def UpdateDate(self):
+        timeInfo = list(time.localtime(time.time()))
+        if timeInfo[1]<10:
+            stringDate = '0'+ str(timeInfo[1]) + '/'
+        else:
+            stringDate = str(timeInfo[1]) + '/'
+        if timeInfo[2]<10:
+            stringDate = stringDate + '0'+ str(timeInfo[2]) + '/'
+        else:
+            stringDate = stringDate + str(timeInfo[2]) + '/'
+        stringDate = stringDate + str(timeInfo[0])
+        
+        self.dateSurf = Vars.CLOCKFONT.render(stringDate,True,Vars.BLACK,Vars.TOOLBARGREY)
+       
     def UpdateClock(self):
         localTime = time.localtime(time.time())
         timeList = list(localTime)
-        
+        if timeList[3] == 0:
+            if timeList[4] == 0:
+                self.UpdateDate()
         if timeList[3]<10:
             stringClock = '0'+ str(timeList[3]) + ':'
         else:
@@ -477,21 +554,23 @@ class Background():
             else:
                 self.timeRects[i].topleft = self.timeRects[i-1].topleft + [0,Vars.BGSLOTHEIGHT]
          
+    def Update(self):
+        #handle interactions
+        self.Draw()
+        
+        
 def InterfaceHandler():
     def __init__(self):
         self.ctrl = False
         self.shft = False
         self.alt = False
-        self.theWindow
-        self.theSelected
-        self.theGUI
         self.interactions
         self.mousePastLoc
         
-        self.Setup()
+        self.Initialize()
     
-    def Setup(self):
-        pass
+    def Initialize(self):
+        self.mousePastLoc = pygame.mouse.get_pos()
     
     def NewLoop(self):
         self.GetActions()
@@ -504,27 +583,39 @@ def InterfaceHandler():
     
     def PushList(self):
         for i in range(len(self.interactions)):
-            aType = Interface.DetermineType(self.interactions[i])
-            if aType== 0:
+            aType = self.interactions[i][0]
+            aKey = self.interactions[i][1]
+            rtnValue = aKey
+            if aType== 'm':
                 #window.mouse(interaction))
                 #theGUI.mouse(interaction)
                 pass
-            if aType == 1:
-                #if ctrl and ctrl = True
-                pass
-            if aType == 2:
-                #if ctrl and ctrl = False
-                pass
-            if aType == 3:
+            elif aType == 'k':
+                if self.shft == True:
+                    rtnValue = aKey.upper()
+                #theSelected.letter(interaction)
+                #theWindow.letter(interaction)
+                #theGui.letter(interaction)
+            elif aType == 's':
+                if aKey == chr(15):
+                    self.shft = True
+                elif aKey == 'Z':
+                    self.ctrl = True
+                elif aKey == 'C':
+                    self.alt = True
+            elif aType == 'h':
+                if aKey == chr(14):
+                    self.shft = False
+                elif aKey == 'X':
+                    self.ctrl = False
+                elif aKey == 'V':
+                    self.alt = False
+            elif aType == 'a':
                 #theSelected.action(interaction)
                 #theWindow.action(interaction)
                 #theGUI.action(interaction)
                 pass
-            if aType == 4:
-                #theSelected.letter(interaction)
-                #theWindow.letter(interaction)
-                #theGui.letter(interaction)
-                pass
+            
     
 def terminate():
     pygame.quit()
@@ -534,9 +625,7 @@ def main():
     powerOverwhelming = Background()
     
     while():
-        powerOverwhelming.Draw()
+        powerOverwhelming.Update()
     
 if __name__ == '__main__':
     main()
-    
-        

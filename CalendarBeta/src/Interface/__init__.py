@@ -9,7 +9,7 @@ def GetInterfaceActions(mousePastLoc):
             Main.terminate()
         elif event.type == KEYDOWN:
             if event.key == K_ESCAPE:
-                a.append(('a',chr(27)))
+                a.append(('a',chr(27))) 
             elif event.key == K_0:
                 a.append(('k','0'))
             elif event.key == K_1:
