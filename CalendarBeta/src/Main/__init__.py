@@ -354,51 +354,98 @@ class Button():
         self.rect.move_ip(diff)
     
 class Window():
-    def __init__(self,loc,aType,BGcolor=Vars.WHITE,FrontColor=Vars.MEDGREY,TextColor=Vars.BLACK):
+    def __init__(self, aType, loc, aChild, bgColor = None,borderColor = None,font = None):
         self.type = aType
-        self.data = []
-        self.boxes = []
-        self.drops = []
-        self.offset = loc
-        self.titleHeight = 25
-        self.height
-        self.width
-        self.closeRect
-        self.minimRect
-        self.title = ''
+        self.loc = loc
+        self.child = aChild
+        self.size = [] #[x,y]; init by type
+        self.rects = [] # Whole Window, BG of Child, Titlebar,Right border, Bottom border
+        self.titlebarText = [] #text, Surface, Rect; init by type
+        self.titlebarBtns = [] #init
+        self.bgColor = bgColor
+        self.borderColor = borderColor
+        self.font = font
+        self.mouse = [] # used if window is moving, holds past mouseLoc
         self.moving = False
-        self.BGrect
-        self.titleRect
-        self.spacing = 5
-        self.BGcolor = BGcolor
-        self.FrontColor = FrontColor
-        self.TextColor = TextColor
+        self.isSelected = False
+        self.childMouse = False
         
-        self.LoadData()
-        
-        
-    def LoadData(self):
-        #also used to reload data if type changes
-        if self.type == 'newlog':
-            self.title = 'New Log'
-            self.width = 200
-            self.height = 100
-            self.MakeRects()
-            aLoc = (self.titleRect.left+self.spacing,self.titleRect.bottom+self.spacing)
-            tempObj = DropBox(aLoc,'newloginit')
+        self.Initialize()
     
-    def MakeRects(self):
-        #need to create checking for outside of bounds
-        self.BGrect = pygame.Rect(self.offset[0],self.offset[1],self.width,self.height)
-        self.titleRect = pygame.Rect(self.BGrect.left,self.BGRect.top,self.BGrect.width,self.titleHeight)
-        btnSize = self.titleHeight-6
-        self.closeRect = pygame.Rect((self.BGrect.right-6-btnSize),(self.BGrect.top-3),btnSize,btnSize)
-        self.minimRect = copy.deepcopy(self.closeRect)
-        self.minimRect.left = self.minimRect.left-6-btnSize
-        
-    def DisplayTitleBar(self):
+    def Initialize(self):
         pass
     
+    def InitRects(self):
+        #need to create checking for outside of bounds
+        pass
+        
+    def Move(self, diff):
+        for i in range(len(self.rects)):
+            self.rects[1].topleft = self.rects[1].topleft+diff
+        self.child.Move(diff)
+        for i in range(2):
+            self.titlebarBtns[i].Move(diff)
+    
+    def MouseUp(self, aLoc):
+        if self.moving == True:
+            self.moving = False
+            diffx = aLoc[0]-self.mouse[0]
+            diffy = aLoc[1]-self.mouse[1]
+            self.Move([diffx,diffy])
+        if self.childMouse == True:
+            self.childMouse = False
+            diffx = aLoc[0]-self.mouse[0]
+            diffy = aLoc[1]-self.mouse[1]
+            self.child.MouseUp([diffx,diffy])
+    
+    def MouseMove(self, aLoc):
+        if self.moving == True:
+            diffx = aLoc[0]-self.mouse[0]
+            diffy = aLoc[1]-self.mouse[1]
+            self.Move([diffx,diffy])
+        if self.childMouse == True:
+            diffx = aLoc[0]-self.mouse[0]
+            diffy = aLoc[1]-self.mouse[1]
+            self.child.MouseMove([diffx,diffy])
+    
+    def LocColl(self, aLoc):
+        #Method is used to check if MouseDown collides with this window
+        if self.rects[0].collidepoint(aLoc)==True:
+            self.isSelected = True
+            #Collide with Child Rect
+            if self.rects[1].collidepoint(aLoc)==True:
+                self.childMouse = self.child.LocColl(aLoc)
+            #Collide with TitleBarRect?
+            elif self.rects[2].collidepoint(aLoc) == True:
+                for i in range(len(self.titlebarButtons)):
+                    if self.titlebarButtons[i].LocColl == True:
+                        self.TitlebarBtn(i)
+                        return False
+                self.moving = True
+                self.mouse = aLoc
+                return True
+            elif self.rects[3].collidepoint(aLoc) == True:
+                pass
+            elif self.rects[4].collidepoint(aLoc) == True:
+                pass
+        return False
+    
+    def TitlebarBtn(self,num):
+        if num == 0:
+            #esc
+            pass
+        if num == 1:
+            #min
+            pass
+    
+    def Draw(self):
+        pygame.draw.rect(Vars.DISPLAYSURF,Vars.DARKGREY,self.rects[0])
+        pygame.draw.rect(Vars.DISPLAYSURF,Vars.WHITE,self.rects[1])
+        for i in range(2):
+            self.titlebarBtns[i].Draw()
+        Vars.DISPLAYSURF.blit(self.titlebarText[0],self.titlebarText[1])
+        self.child.Draw()
+  
 class Background():
     def __init__(self):
         self.windows = []
