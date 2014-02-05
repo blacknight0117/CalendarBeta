@@ -1,7 +1,64 @@
 import random, sys, copy, os, pygame, math, Main, Vars
 from pygame.locals import *
 
+
+class InterfaceHandler():
+    def __init__(self):
+        self.ctrl = False
+        self.shft = False
+        self.alt = False
+        self.interactions
+        self.mousePastLoc
+        
+        self.Initialize()
     
+    def Initialize(self):
+        self.mousePastLoc = pygame.mouse.get_pos()
+    
+    def NewLoop(self):
+        self.GetActions()
+        self.PushList()
+    
+    def GetActions(self):
+        temp = Interface.GetInterfaceActions(self.mousePastLoc)
+        self.interactions = temp[0]
+        self.mousePastLoc = temp[1]
+    
+    def PushList(self):
+        for i in range(len(self.interactions)):
+            aType = self.interactions[i][0]
+            aKey = self.interactions[i][1]
+            rtnValue = aKey
+            if aType== 'm':
+                #window.mouse(interaction))
+                #theGUI.mouse(interaction)
+                pass
+            elif aType == 'k':
+                if self.shft == True:
+                    rtnValue = aKey.upper()
+                #theSelected.letter(interaction)
+                #theWindow.letter(interaction)
+                #theGui.letter(interaction)
+            elif aType == 's':
+                if aKey == chr(15):
+                    self.shft = True
+                elif aKey == 'Z':
+                    self.ctrl = True
+                elif aKey == 'C':
+                    self.alt = True
+            elif aType == 'h':
+                if aKey == chr(14):
+                    self.shft = False
+                elif aKey == 'X':
+                    self.ctrl = False
+                elif aKey == 'V':
+                    self.alt = False
+            elif aType == 'a':
+                #theSelected.action(interaction)
+                #theWindow.action(interaction)
+                #theGUI.action(interaction)
+                pass
+   
 def GetInterfaceActions(mousePastLoc):
     a = []
     for event in pygame.event.get():
