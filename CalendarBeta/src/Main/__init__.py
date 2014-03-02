@@ -6,7 +6,7 @@ class InputBox():
         self.heightLetter = sizey
         self.widthLetter = sizex
         self.height = Vars.AFONTSIZE*sizey+2
-        self.width = 0 
+        self.width = 0
         self.location = loc
         self.BGcolor = BGcolor
         self.TextColor = TextColor
