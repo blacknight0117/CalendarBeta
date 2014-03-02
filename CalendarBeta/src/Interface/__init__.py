@@ -7,8 +7,10 @@ class InterfaceHandler():
         self.ctrl = False
         self.shft = False
         self.alt = False
-        self.interactions
-        self.mousePastLoc
+        self.caps = False
+        self.numLock = True
+        self.interactions = []
+        self.mousePastLoc = []
         
         self.Initialize()
     
@@ -20,7 +22,7 @@ class InterfaceHandler():
         self.PushList()
     
     def GetActions(self):
-        temp = Interface.GetInterfaceActions(self.mousePastLoc)
+        temp = GetInterfaceActions(self.mousePastLoc)
         self.interactions = temp[0]
         self.mousePastLoc = temp[1]
     
@@ -30,15 +32,10 @@ class InterfaceHandler():
             aKey = self.interactions[i][1]
             rtnValue = aKey
             if aType== 'm':
-                #window.mouse(interaction))
-                #theGUI.mouse(interaction)
                 pass
             elif aType == 'k':
-                if self.shft == True:
+                if self.shft == True or self.caps == True:
                     rtnValue = aKey.upper()
-                #theSelected.letter(interaction)
-                #theWindow.letter(interaction)
-                #theGui.letter(interaction)
             elif aType == 's':
                 if aKey == chr(15):
                     self.shft = True
@@ -54,9 +51,6 @@ class InterfaceHandler():
                 elif aKey == 'V':
                     self.alt = False
             elif aType == 'a':
-                #theSelected.action(interaction)
-                #theWindow.action(interaction)
-                #theGUI.action(interaction)
                 pass
    
 def GetInterfaceActions(mousePastLoc):
