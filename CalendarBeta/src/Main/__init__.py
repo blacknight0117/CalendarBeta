@@ -6,7 +6,7 @@ class InputBox():
         self.heightLetter = sizey
         self.widthLetter = sizex
         self.height = Vars.AFONTSIZE*sizey+2
-        self.width = 0
+        self.width = 0 
         self.location = loc
         self.BGcolor = BGcolor
         self.TextColor = TextColor
@@ -453,23 +453,19 @@ class Background():
     def __init__(self):
         self.windows = []
         self.toolButtons = []
-        self.toolbarRect
-        self.titlebarRect
+        self.toolbarRect = None
+        self.titlebarRect = None
         self.startTime = 4
         self.timeSurfs = []
         self.timeRects = []
         self.bgColorRects = []
-        self.clockSurf
-        self.clockRect
-        self.dateSurf
-        self.dateRect
-        self.viewMonthSurf
-        self.viewDaySurf
-        self.viewMonthRect
-        self.viewDayRect
-        self.viewYearSurf
-        self.viewYearRect
+        self.clockSurf = None
+        self.clockRect = None
+        self.dateSurf = None
+        self.dateRect = None
+        self.viewDateInfo = [None,None,None,None,None,None] # MonthSurf/Rect,DaySurf/Rect,YearSurf/Rect
         self.viewDate = [0,0,0]
+        
         self.Initialize()
     
     def Initialize(self):
@@ -481,16 +477,17 @@ class Background():
         self.UpdateDate()
         self.dateRect = self.dateSurf.get_rect()
         self.dateRect.topleft = Vars.DATEPOS
+        
         timeInfo = list(time.localtime(time.time()))
         self.ChangeViewYear(timeInfo[0])
         self.ChangeViewMonth(timeInfo[1])
         self.ChangeViewDay(timeInfo[2])
-        self.viewMonthRect = self.viewMonthSurf.get_rect()
-        self.viewMonthRect.topleft = Vars.VIEWMONTHPOS
-        self.viewDayRect = self.viewDaySurf.get_rect()
-        self.viewDayRect.topleft = self.viewMonthRect.topright
-        self.viewYearRect = self.viewYearSurf.get_rect()
-        self.viewYearRect.topleft = self.viewDayRect.topright
+        self.viewDateInfo[1] = self.viewMonthSurf.get_rect()
+        self.viewDateInfo[1].topleft = Vars.VIEWMONTHPOS
+        self.viewDateInfo[3] = self.viewDaySurf.get_rect()
+        self.viewDateInfo[3].topleft = self.viewMonthRect.topright
+        self.viewDateInfo[5] = self.viewYearSurf.get_rect()
+        self.viewDateInfo[5].topleft = self.viewDayRect.topright
         
     def Draw(self):
         self.UpdateClock()
@@ -525,7 +522,7 @@ class Background():
             dayString = aDay + 'rd'
         else:
             dayString = aDay + 'th'
-        self.viewDaySurf = Vars.CLOCKFONT.render(dayString,True,Vars.BLACK,Vars.TOOLBARGREY)
+        self.viewDateInfo[2] = Vars.CLOCKFONT.render(dayString,True,Vars.BLACK,Vars.TOOLBARGREY)
         
         #when other stuff is implemented do shit
     
@@ -555,12 +552,12 @@ class Background():
             monthString = 'November'
         elif aMonth == 12:
             monthString = 'December'
-        self.viewMonthSurf = Vars.CLOCKFONT.render(monthString,True,Vars.BLACK,Vars.TOOLBARGREY)
+        self.viewDateInfo[0] = Vars.CLOCKFONT.render(monthString,True,Vars.BLACK,Vars.TOOLBARGREY)
         #when other stuff is implemented do shit
     
     def ChangeViewYear(self,aYear):
         self.viewDate[2] = aYear
-        self.viewYearSurf = Vars.CLOCKFONT.render(aYear,True,Vars.BLACK,Vars.TOOLBARGREY)
+        self.viewDateInfo[4] = Vars.CLOCKFONT.render(aYear,True,Vars.BLACK,Vars.TOOLBARGREY)
         #when other stuff is implemented do shit
     
     def UpdateDate(self):
@@ -623,65 +620,6 @@ class Background():
         #handle interactions
         self.Draw()
         
-        
-def InterfaceHandler():
-    def __init__(self):
-        self.ctrl = False
-        self.shft = False
-        self.alt = False
-        self.interactions
-        self.mousePastLoc
-        
-        self.Initialize()
-    
-    def Initialize(self):
-        self.mousePastLoc = pygame.mouse.get_pos()
-    
-    def NewLoop(self):
-        self.GetActions()
-        self.PushList()
-    
-    def GetActions(self):
-        temp = Interface.GetInterfaceActions(self.mousePastLoc)
-        self.interactions = temp[0]
-        self.mousePastLoc = temp[1]
-    
-    def PushList(self):
-        for i in range(len(self.interactions)):
-            aType = self.interactions[i][0]
-            aKey = self.interactions[i][1]
-            rtnValue = aKey
-            if aType== 'm':
-                #window.mouse(interaction))
-                #theGUI.mouse(interaction)
-                pass
-            elif aType == 'k':
-                if self.shft == True:
-                    rtnValue = aKey.upper()
-                #theSelected.letter(interaction)
-                #theWindow.letter(interaction)
-                #theGui.letter(interaction)
-            elif aType == 's':
-                if aKey == chr(15):
-                    self.shft = True
-                elif aKey == 'Z':
-                    self.ctrl = True
-                elif aKey == 'C':
-                    self.alt = True
-            elif aType == 'h':
-                if aKey == chr(14):
-                    self.shft = False
-                elif aKey == 'X':
-                    self.ctrl = False
-                elif aKey == 'V':
-                    self.alt = False
-            elif aType == 'a':
-                #theSelected.action(interaction)
-                #theWindow.action(interaction)
-                #theGUI.action(interaction)
-                pass
-            
-    
 def terminate():
     pygame.quit()
     sys.exit()
